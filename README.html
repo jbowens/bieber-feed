@@ -1,0 +1,31 @@
+<p><link rel="stylesheet" href="github.css"/>
+<link rel="stylesheet" href="github.md.css"/></p>
+
+<script src="highlight.pack.js" type="text/javascript"></script>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+<h1>Bieber Feed: Api Docs</h1>
+
+<p>Welcome to the <strong>Bieber Feed</strong>, a swaggy API powered by Twitter.</p>
+
+<h2>Authentication</h2>
+
+<p>To use the API you have to add your login to the end of a url (indicated by <code>/:login</code>) in each endpoint. Requests to the API are logged and you cannot make calls with different logins during the same session.</p>
+
+<h2>Endpoints</h2>
+
+<h3><code>/feed/:login</code></h3>
+
+<p>Get 25 tweets. Note that these might overlap with tweets you've previously received. It's your responsibility to filter out duplicate tweets. Note that tweets each have a unique <code>id</code> field. <a href="https://dev.twitter.com/docs/platform-objects/tweets">Here's a list of the fields on a tweet object</a>. Note that our tweets do have <a href="https://dev.twitter.com/docs/tweet-entities">entities</a>.</p>
+
+<h3><code>/feed/stats/:login</code></h3>
+
+<p>This endpoint provides some stats on the tweets available:</p>
+
+<pre><code>{  
+  "count" : 24,  // number of tweets  
+  "last" : "", // id of the last tweet  
+  "terms" : [ "bieber" , "justin bieber", "@justinbieber" ] // the search terms used to query the Twitter streaming API  
+}
+</code></pre>

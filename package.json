@@ -1,0 +1,29 @@
+{
+  "name": "bieber-tweets",
+  "version": "0.0.1",
+  "description": "getting bieber fever with the bieber feeder",
+  "main": "bieber.js",
+  "dependencies": {
+    "express": ">3.0.0",
+    "twit" : ">=1.0.2",
+    "mongodb" : ">=0.1.0",
+    "debug" : ">0.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brown-cs132-s13/bieber-tweets.git"
+  },
+  "keywords": [
+    "bieber",
+    "twitter",
+    "git"
+  ],
+  "author": "nickjacob",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "bb0cde42e1cdf5cdc199008abbe6bcf164e2ff61"
+}
