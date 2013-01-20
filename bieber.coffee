@@ -15,6 +15,13 @@ debug "authenticated with twitter: #{ T }"
 
 app = express()
 
+crossDomain = (req, res, next) ->
+  res.header 'Access-Control-Allow-Origin', '*'
+  res.header 'Access-Control-Allow-Methods', 'GET,POST,OPTIONS'
+  res.header 'Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With'
+  next()
+
+
 app.tweets = []
 app.numTweets = 0
 app.terms = [ 'bieber', 'justin bieber', '@justinbieber' ]
@@ -29,6 +36,7 @@ app.stream.on 'tweet', (tweet) ->
     debug "tweet invalid: #{ tweet }"
 
 
+app.use crossDomain
 app.use express.logger()
 app.use express.bodyParser()
 app.use express.cookieParser()
