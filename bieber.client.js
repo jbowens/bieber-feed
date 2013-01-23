@@ -8,7 +8,8 @@
 ;(function __CS132__(window, undefined) {
   var BIEBER_URL = 'http://localhost:1337/feed/{{login}}',
       ERROR_THRESHOLD = 100, err_count = 0, loop = null, callbacks = {},
-      Bieber = window.Bieber = window.Bieber || {};
+      Bieber = window.Bieber = window.Bieber || {},
+      received = {}; // ID => Tweet
 
 
   function ajax (conf) {
@@ -113,7 +114,12 @@
         if (tweets && tweets.length) {
           var i = 0, len = tweets.length;
           for(; i < len; i++) {
-            _emit('tweet', tweets[i]);
+            var tweet = tweets[i];
+            if (tweet['id']) {
+              if (!received[tweet['id']] && (received[tweet['id']] = tweet)) {
+                _emit('tweet', tweets[i]);
+              }
+            }
           }
         }
       },
