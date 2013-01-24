@@ -9,7 +9,7 @@
 
   function __CS132__(window, url, login, undefined) {
 
-    var BIEBER_URL = url + '/' + login;
+    var BIEBER_URL = url + '/' + login,
         ERROR_THRESHOLD = 100, err_count = 0, loop = null, callbacks = {},
         errorHandler = null,
         Bieber = window.Bieber = window.Bieber || {},
