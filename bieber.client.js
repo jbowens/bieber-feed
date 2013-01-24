@@ -10,13 +10,15 @@
   function __CS132__(window, url, login, undefined) {
 
     var BIEBER_URL = url + '/' + login,
-        ERROR_THRESHOLD = 100, err_count = 0, loop = null, callbacks = {},
-        errorHandler = null,
-        Bieber = window.Bieber = window.Bieber || {},
-        // list the events to give
+        ERROR_THRESHOLD = 100,
         hasOwnProperty = Object.prototype.hasOwnProperty,
         toString = Object.prototype.toString,
         noop = function() {},
+        err_count = 0,
+        loop = null,
+        callbacks = {},
+        errorHandler = null,
+        Bieber = window.Bieber,
         EVENTS = {
           tweet: 'tweet',
           start: 'start',
@@ -39,64 +41,43 @@
     // helpers
     function isFunction(fn, arity) {
       ((toString.call(fn) === '[object Function]') &&
-      (arity !== undefined && fn.length >= arity));
+      (arity !==  undefined ? fn.length >= arity : true));
     }
 
 
-    function ajax (conf) {
-      var request = new XMLHttpRequest(),
-          params = parametize(conf.data);
-
-      conf.method = conf.method ? conf.method.toUpperCase() : 'GET';
-      conf.url += (conf.method === 'GET') ? '?' + params : '';
-      request.open(conf.method, conf.url, true);
-
-      if (conf.method === 'POST') {
-        request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        request.setRequestHeader('Content-length', params.length);
-        request.setRequestHeader('Connection', 'close');
-        request.send(params);
-      } else {
-        request.send();
-      }
+    function ajax (success, error) {
+      var request = new XMLHttpRequest(), json = null, toJson = JSON && JSON.parse ? JSON.parse : eval;
+      request.open('GET', BIEBER_URL, true);
+      request.send();
 
       request.onreadystatechange = function () {
         if (request.readyState === 4) {
           if (request.status === 200) {
-            conf.success(request.responseText, request);
+            success(request.responseText, request);
           } else {
-            conf.error(request);
+            error(request);
           }
         }
       }
-    }
-
-    function parametize(data) {
-      if (!data) return null;
-
-      var params = '', key;
-      for(key in data) {
-        if (hasOwnProperty.call(data,key)) {
-          params += encodeURIComponent(key) + '=' + encodeURIComponent(data[key]) + '&';
-        }
-      }
-      return params;
     }
 
     // create custom getters & setters for the events 'on' + event
     for(var evt in EVENTS) {
       if (hasOwnProperty.call(EVENTS,evt)) {
         (function(event) {
+          var cbIndex = 0;
+
           Object.defineProperty(Bieber, 'on' + event, {
             set: function (val) {
               if (!isFunction(val,1)) {
                 throw new BieberFeedError("Event listener must be a function that takes one argument. Found: " + toString.call(val) + " | takes: " + val.length + " arguments");
               }
               else {
-                Bieber.addEventListener(event, val);
+                cbIndex = Bieber.addEventListener(event, val);
               }
             },
             get: function() {
+              return callbacks[event] && (callbacks[event].length < cbIndex) ? callbacks[event][cbIndex] : null;
             }
 
           });
@@ -124,12 +105,14 @@
       if (loop) {
         clearInterval(loop);
         _emit('end');
+      } else {
+        throw new BieberFeedError("Attempt to stop inactive Bieber");
       }
     };
 
     // Bieber.addEventListener
     // add a listener for the given event
-    Bieber.addEventListener = function (event, cb) {
+    Bieber.addEventListener = Bieber.on = function (event, cb) {
       if (EVENTS[event] && (event = EVENTS[event])) {
         callbacks[event] = callbacks[event] || [];
         callbacks[event].push(cb);
@@ -156,33 +139,40 @@
       });
     }
 
+    Bieber.ready = function () {
+      _emit('ready', Bieber);
+    }
+
 
     /// PRIVATE FUNCTIONS
 
     function _callAPI() {
-      ajax({
-        method: 'GET',
-        url: BIEBER_URL,
-        success: function (tweets) {
+      ajax(
+        // receiving success in ajax
+        function (tweets) {
           if (tweets && tweets.length) {
-            var i = 0, len = tweets.length;
-            for(; i < len; i++) {
-              var tweet = tweets[i];
+            var i = 0, len = tweets.length, tweet = null;
+            for(; i < len; (tweet = tweets[i]), i++) {
               if (tweet['id']) {
                 if (!received[tweet['id']] && (received[tweet['id']] = tweet)) {
-                  _emit('tweet', tweets[i]);
+                  if (isFunction(Bieber.tpl)) {
+                    _emit('tweet', Bieber.tpl(tweet), tweet);
+                  } else {
+                    _emit('tweet', tweets);
+                  }
                 }
               }
             }
           }
         },
-        error: function (err) {
+        function (err) {
           _emit('error', tweets[i]);
           if (++err_count > ERROR_THRESHOLD) {
             Bieber.stop(err);
           }
         }
-      });
+
+      );
     }
 
     function _emit(event, data) {
@@ -199,6 +189,42 @@
       }
     }
 
+    var variable_match = RegExp("{{([\w+\.])}}", 'g');
+
+    function _deep_match(obj, path) {
+      if (obj === undefined || !path.length) {
+        return undefined;
+      }
+      else if (path.length > 1) {
+        return _deep_match(obj[path.shift()], path);
+      }
+
+      return obj[path[0]];
+    }
+
+    function _tpl (template) {
+
+      return function (data) {
+        var match = '';
+        return template.replace(variable_math, function (all, variable) {
+          if (match = _deep_match(data, variable.split(".")) && match != null) {
+            return match;
+          } else {
+            throw new BieberFeedError("template error: attribute does not exist [" + variable + "]");
+          }
+        });
+      }
+    }
+
+    Bieber.tpl = null;
+    Bieber.setTemplate = function (el) {
+      el = (toString.call(el) === '[object String]') ? document.querySelector(el) : el;
+      Bieber.tpl = _tpl(el.innerHTML);
+    }
+
+
+    return Bieber;
+
   }
 
   // check that the window is ok
@@ -210,9 +236,26 @@
     throw new Error("Missing Bieber Configuration: window.BIEBER_URL and window.STUDENT_LOGIN");
   }
 
+  Bieber = window.Bieber = (function (cb) {
+
+    if (this === window) {
+      return new Bieber(cb);
+    }
+    else {
+      this.onready = cb;
+    }
+
+  });
+
   // now you're good; define everything on load
   window.addEventListener('load', function (event) {
-    __CS132__(window, window.BIEBER_URL, window.STUDENT_LOGIN, (void(0)));
+    var Bieber = __CS132__(window, window.BIEBER_URL, window.STUDENT_LOGIN, (void(0)));
+    Bieber.ready();
   }, false);
+
+
+  // we want people to assign to Bieber.onready
+  Bieber.onready = null;
+
 
 }(window));
