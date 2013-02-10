@@ -122,7 +122,7 @@
     }
   };
 
-  app.param('login', logRequest);
+  // app.param('login', logRequest);
 
   getTweets = function() {
     if (app.numTweets > 25) {
