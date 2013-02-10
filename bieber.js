@@ -68,10 +68,6 @@
     secret: 'cs132-bieber'
   }));
 
-  app.use(function(req, res, next) {
-    res.type('json');
-  });
-
   connectDB = function(cb) {
     debug("connecting to database");
     return MongoClient.connect('mongodb://justin:bieber@linus.mongohq.com:10053/bieber-feed', function(err, db) {
