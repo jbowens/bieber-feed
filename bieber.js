@@ -84,7 +84,7 @@
     });
   };
 
-  port = process.env.port || 1337;
+  port = process.env.port || '/var/run/bieber.sock';
 
   logRequest = function(req, res, next, login) {
     if (req.session == null) {
