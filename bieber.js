@@ -69,7 +69,8 @@
   }));
 
   app.use(function(req, res, next) {
-    return res.type('json');
+    res.type('json');
+    next();
   });
 
   connectDB = function(cb) {
@@ -146,7 +147,7 @@
     } else {
       return res.send(200, {
         count: app.numTweets,
-        last: app.tweets[app.numTweets(-1)]['id'],
+        last: app.tweets[app.numTweets-1]['id'],
         terms: app.terms
       });
     }
