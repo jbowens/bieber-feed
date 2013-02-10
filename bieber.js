@@ -70,7 +70,6 @@
 
   app.use(function(req, res, next) {
     res.type('json');
-    next();
   });
 
   connectDB = function(cb) {
