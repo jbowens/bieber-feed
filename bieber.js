@@ -56,7 +56,7 @@
 
   app.use(express.bodyParser());
 
-  app.use(express.cookieParser());
+  // app.use(express.cookieParser());
 
   app.use(app.router);
 
