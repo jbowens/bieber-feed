@@ -41,7 +41,7 @@ app.use express.logger()
 app.use express.bodyParser()
 app.use express.cookieParser()
 app.use app.router
-app.use( express.session { secret: 'cs132-bieber' })
+app.use( express.session { secret: 'cs132-miley' })
 app.use express.cookieSession {
   secret: 'cs132-miley'
 }
