@@ -3,6 +3,7 @@ debug = require('debug')('cs132:Miley')
 MongoClient = require('mongodb').MongoClient
 Twit = require 'twit'
 
+debug "starting up"
 
 T = new Twit {
   consumer_key: 'syGpfR9NdgPkiVnn6Qmvg'
@@ -115,7 +116,7 @@ app.get '/feed/stats/:login', (req, res) ->
   if not req.params.login
     res.send 403, "unauthenticated"
   else
-    res.send 200, { count: app.numTweets, last: app.tweets[app.numTweets -1]['id'], terms: app.terms }
+    res.send 200, { count: app.numTweets, last: app.tweets[app.numTweets-1]['id'], terms: app.terms }
 
 app.get '/feed/stats', (req, res) ->
   if not req.query.login
