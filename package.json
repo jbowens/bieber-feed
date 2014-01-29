@@ -1,8 +1,8 @@
 {
-  "name": "bieber-tweets",
+  "name": "miley-tweets",
   "version": "0.0.1",
-  "description": "getting bieber fever with the bieber feeder",
-  "main": "bieber.js",
+  "description": "i <3 miley",
+  "main": "miley.js",
   "dependencies": {
     "express": ">3.0.0",
     "twit" : ">=1.0.2",
@@ -15,15 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/brown-cs132-s13/bieber-tweets.git"
+    "url": "git://github.com/jbowens/miley-feed.git"
   },
   "keywords": [
-    "bieber",
+    "miley",
     "twitter",
     "git"
   ],
   "author": "nickjacob",
   "license": "BSD",
-  "readmeFilename": "README.md",
-  "gitHead": "bb0cde42e1cdf5cdc199008abbe6bcf164e2ff61"
+  "readmeFilename": "README.md"
 }
