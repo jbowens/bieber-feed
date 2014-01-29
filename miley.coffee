@@ -51,7 +51,7 @@ app.use (req, res, next) ->
 
 connectDB = (cb) ->
   debug("connecting to database")
-  MongoClient.connect('mongodb://justin:bieber@linus.mongohq.com:10053/bieber-feed', (err, db) ->
+  MongoClient.connect('mongodb://127.0.0.1:27017/miley', (err, db) ->
     if err
       debug "error connect to DB"
       cb(err, null)
