@@ -3,8 +3,8 @@
 <script src="highlight.pack.js" type="text/javascript"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
-# Bieber Feed: Api Docs
-Welcome to the **Bieber Feed**, a swaggy API powered by Twitter.
+# Miley Feed: Api Docs
+Welcome to the **Miley Feed**, a swaggy API powered by Twitter.
 
 ## Authentication
 To use the API you have to add your login to the end of a url (indicated by `/:login`) in each endpoint. Requests to the API are logged and you cannot make calls with different logins during the same session.
@@ -21,5 +21,8 @@ This endpoint provides some stats on the tweets available:
     {  
       "count" : 24,  // number of tweets  
       "last" : "", // id of the last tweet  
-      "terms" : [ "bieber" , "justin bieber", "@justinbieber" ] // the search terms used to query the Twitter streaming API  
+      "terms" : [ "miley" , "miley cyrus", "@mileycyrus" ] // the search terms used to query the Twitter streaming API  
     }  
+
+## Source
+If you're interested in how the Miley Feed works, the source is available on [github](https://github.com/jbowens/miley-feed). The server is also written in JavaScript, using node.js, the topic of the next project.
