@@ -25,4 +25,4 @@ This endpoint provides some stats on the tweets available:
     }  
 
 ## Source
-If you're interested in how the Miley Feed works, the source is available on [github](https://github.com/jbowens/miley-feed). The server is also written in JavaScript, using node.js, the topic of the next project.
+If you're interested in how the Miley Feed works, the source is available on [github](https://github.com/jbowens/miley-feed). The server is also written in JavaScript using node.js, the topic of the next project.
