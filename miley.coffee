@@ -50,6 +50,8 @@ app.use express.cookieSession {
 app.use (req, res, next) ->
   res.type 'json'
 
+global_db = null
+
 connectDB = (cb) ->
   debug("connecting to database")
   MongoClient.connect('mongodb://127.0.0.1:27017/miley', (err, db) ->
@@ -79,29 +81,22 @@ logRequest = (req, res, next, login) ->
     next(403)
   else
     req.session.login = login
-    connectDB (err, connections) ->
-      if not err
-        connections.insert({
-          login: login
-          time: Date.now()
-          query: req.query
-          ip: req.ip
-          host: req.host
-          xhr: req.xhr
-          secure: req.secure
-        }, (err, connection) ->
-          if err
-            debug "Error logging connection: #{ err }"
-            next(err)
-          else
-            debug "Logged Connection: #{ connection }"
-            next()
-
-        )
-      else
-        console.error err
+    global_db.insert({
+      login: login
+      time: Date.now()
+      query: req.query
+      ip: req.ip
+      host: req.host
+      xhr: req.xhr
+      secure: req.secure
+    }, (err, connection) ->
+      if err
+        debug "Error logging connection: #{ err }"
         next(err)
-
+      else
+        debug "Logged Connection: #{ connection }"
+        next()
+    )
 
 app.param('login', logRequest)
 
@@ -130,5 +125,7 @@ app.get '/feed/:login', (req, res) ->
   else
     res.send 200, getTweets()
 
-app.listen port, () ->
-  console.log "[Miley Listening] #{ port }"
+connectDB (err, connections) ->
+    global_db = connections
+    app.listen port, () ->
+      console.log "[Miley Listening] #{ port }"
