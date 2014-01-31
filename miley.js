@@ -1,35 +1,61 @@
 (function() {
-  var cluster = require('cluster');
+  var cluster, twitterTerms, debug;
+  
+  debug = require('debug')('cs132:Miley');
+  twitterTerms = ['miley', 'miley cyrus', '@MileyCyrus'];
+  
+  cluster = require('cluster');
 
   if (cluster.isMaster) {
-    var cpus = require('os').cpus().length;
-
-    for (var i = 0; i < 1; i++) {
-      cluster.fork();
-    }
-
-    cluster.on('exit', function (worker) {
-      console.log("worker " + worker.id + " died, reviving now...");
-      cluster.fork();
-    });
-
-  } else {
-    var MongoClient, T, Twit, app, connectDB, crossDomain, debug, express, getTweets, global_db, logRequest, port;
-
-    express = require('express');
-    debug = require('debug')('cs132:Miley');
-    MongoClient = require('mongodb').MongoClient;
+    var cpus, T, Twit, stream, workers;
+    
     Twit = require('twit');
-    debug("starting up");
-
     T = new Twit({
       consumer_key: 'syGpfR9NdgPkiVnn6Qmvg',
       consumer_secret: '7HmHD2jyjootGg8AAQUVmi5NROsF4MlJ91AIIfe60A',
       access_token: '15153270-QjPbYSisbGuZTM8NFZjc8uFA85HgY2oy6omYdyewq',
       access_token_secret: 'GPPgGWCXWyGP1JLAoM2xRggnPrN4KPVXdYNzDnPWJzI'
     });
-
     debug("authenticated with twitter: " + T);
+
+    broadcast = function(msg) {
+      for (var i = 0; i < workers.length; i++) {
+        workers[i].send(msg);
+      }
+    }
+
+    stream = T.stream('statuses/filter', {
+      track: twitterTerms.join()
+    });
+
+    stream.on('tweet', function(tweet) {
+      if (tweet && tweet.text && tweet.id) {
+        broadcast(tweet);
+      } else {
+        return debug("tweet invalid: " + tweet);
+      }
+    });
+
+    workers = [];
+    cpus = require('os').cpus().length;
+    for (var i = 0; i < cpus; i++) {
+      workers.push(cluster.fork());
+    }
+
+    cluster.on('exit', function (worker) {
+      console.log("worker " + worker.id + " died, reviving now...");
+      workerIndex = workers.indexOf(worker);
+      if (workerIndex > -1)
+        workers.splice(workerIndex, 1);
+      workers.push(cluster.fork());
+    });
+
+  } else {
+    var MongoClient, app, connectDB, crossDomain, express, getTweets, global_db, logRequest, port;
+
+    express = require('express');
+    MongoClient = require('mongodb').MongoClient;
+    debug("starting up");
 
     app = express();
 
@@ -41,16 +67,9 @@
     };
 
     app.tweets = [];
-
     app.numTweets = 0;
 
-    app.terms = ['miley', 'miley cyrus', '@MileyCyrus'];
-
-    app.stream = T.stream('statuses/filter', {
-      track: app.terms.join()
-    });
-
-    app.stream.on('tweet', function(tweet) {
+    process.on('message', function(tweet) {
       if (tweet && tweet.text && tweet.id) {
         app.tweets.push(tweet);
         if (app.tweets.length > 50) {
@@ -63,13 +82,9 @@
     });
 
     app.use(crossDomain);
-
     app.use(express.logger());
-
     app.use(express.bodyParser());
-
     app.use(express.cookieParser());
-
     app.use(app.router);
 
     app.use(express.session({
@@ -154,7 +169,7 @@
         return res.send(200, {
           count: app.numTweets,
           last: app.tweets[app.numTweets - 1]['id'],
-          terms: app.terms
+          terms: tweetTerms
         });
       }
     });
