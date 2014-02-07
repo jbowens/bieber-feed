@@ -169,7 +169,7 @@
         return res.send(200, {
           count: app.numTweets,
           last: app.tweets[app.numTweets - 1]['id'],
-          terms: tweetTerms
+          terms: twitterTerms
         });
       }
     });
